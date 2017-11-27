@@ -44,27 +44,75 @@ data_dict = pickle.load( open("../final_project/final_project_dataset.pkl", "r")
 data_dict.pop("TOTAL", 0)
 
 
+
 ### the input features we want to use 
 ### can be any key in the person-level dictionary (salary, director_fees, etc.) 
 feature_1 = "salary"
 feature_2 = "exercised_stock_options"
+feature_3 = "total_payments"
 poi  = "poi"
-features_list = [poi, feature_1, feature_2]
+features_list = [poi, feature_1, feature_2, feature_3]
 data = featureFormat(data_dict, features_list )
 poi, finance_features = targetFeatureSplit( data )
 
+
+### Scaling
+d = {}
+for name in data_dict:
+    if data_dict[name]['exercised_stock_options'] != "NaN":
+        d[name] = data_dict[name]['exercised_stock_options']
+
+mini = min(d, key=d.get)
+maxi = max(d, key=d.get)
+print mini, d[mini], " -::- ", maxi, d[maxi]
+
+from sklearn.preprocessing import MinMaxScaler
+_scale = MinMaxScaler()
+_scaled_finance_features = _scale.fit_transform(finance_features)
+print "Scale (1000000)", _scale.fit_transform([[3285.], [1000000.], [34348384.]])
 
 ### in the "clustering with 3 features" part of the mini-project,
 ### you'll want to change this line to 
 ### for f1, f2, _ in finance_features:
 ### (as it's currently written, the line below assumes 2 features)
-for f1, f2 in finance_features:
+for f1, f2, f3 in finance_features:
     plt.scatter( f1, f2 )
 plt.show()
+
+
+# min and max of options
+stock_options = []
+for key, value in data_dict.iteritems():
+    if value['exercised_stock_options'] != 'NaN':
+        stock_options.append(value['exercised_stock_options'])
+# Then order this list
+stock_options_sorted = sorted(stock_options)
+print "Minimum stock options:", stock_options_sorted[0]
+print "Maximum stock options:", stock_options_sorted[len(stock_options_sorted)-1]
+
+salary = []
+for key, value in data_dict.iteritems():
+    if value['salary'] != 'NaN':
+        salary.append(value['salary'])
+# Then order this list
+salary = sorted(salary)
+print "Minimum salary:", salary[0]
+print "Maximum salary:", salary[len(salary)-1]
+
+
+#minimum = min([v['salary'] for k,v in data_dict.items() if v['salary'] != 'NaN'])
+#maximum = max([v['salary'] for k,v in data_dict.items() if v['salary'] != 'NaN'])
+#print minimum, maximum
+
 
 ### cluster here; create predictions of the cluster labels
 ### for the data and store them to a list called pred
 
+
+from sklearn import cluster
+km = cluster.KMeans(n_clusters=2)
+#km.fit(finance_features)
+pred = km.fit_predict(finance_features)
 
 
 

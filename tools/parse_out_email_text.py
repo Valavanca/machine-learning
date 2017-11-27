@@ -29,14 +29,23 @@ def parseOutText(f):
 
         ### project part 2: comment out the line below
         words = text_string
+        word_arr = words.split()
+        stem_arr = []
 
         ### split the text string into individual words, stem each word,
         ### and append the stemmed word to words (make sure there's a single
         ### space between each stemmed word)
+
+        snowball = SnowballStemmer("english")
+        for word in word_arr :
+            stem = snowball.stem(word) + ' '
+            ###print "[", word, "] -", stem
+            stem_arr.append(stem)
         
 
 
-
+    ###print "stem_arr", stem_arr
+    words = ''.join(stem_arr)
 
     return words
 
@@ -45,7 +54,8 @@ def parseOutText(f):
 def main():
     ff = open("../text_learning/test_email.txt", "r")
     text = parseOutText(ff)
-    print text
+    ### print "var :: ", ff
+    print "text :: ", text
 
 
 

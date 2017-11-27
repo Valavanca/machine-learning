@@ -29,7 +29,7 @@ target, features = targetFeatureSplit( data )
 from sklearn.cross_validation import train_test_split
 feature_train, feature_test, target_train, target_test = train_test_split(features, target, test_size=0.5, random_state=42)
 train_color = "b"
-test_color = "b"
+test_color = "r"
 
 
 
@@ -39,9 +39,14 @@ test_color = "b"
 ### "r" to differentiate training points from test points.
 
 
+from sklearn.linear_model import LinearRegression
 
+reg = LinearRegression()
 
+reg = reg.fit(feature_train, target_train)
 
+print "Test :: ", reg.score(feature_test, target_test)
+print "Train :: ", reg.score(feature_train, target_train)
 
 
 
@@ -64,6 +69,13 @@ try:
     plt.plot( feature_test, reg.predict(feature_test) )
 except NameError:
     pass
+
+reg.fit(feature_test, target_test)
+plt.plot(feature_train, reg.predict(feature_train), color="b") 
+print "Test 2 :: ", reg.score(feature_test, target_test)
+print "Train 2 :: ", reg.score(feature_train, target_train)
+
+
 plt.xlabel(features_list[1])
 plt.ylabel(features_list[0])
 plt.legend()
