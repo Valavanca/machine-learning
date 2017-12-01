@@ -11,6 +11,7 @@ from tester import dump_classifier_and_data
 ## USER
 from time import time
 import tester
+from sklearn.metrics import recall_score
 
 ### Task 1: Select what features you'll use.
 ### features_list is a list of strings, each of which is a feature name.
@@ -23,8 +24,6 @@ features_list += ['salary', 'deferral_payments', 'total_payments', # financial f
                   'restricted_stock', 'director_fees']
 features_list += ['to_messages', 'from_poi_to_this_person', # email features
 		  'from_messages', 'from_this_person_to_poi', 'shared_receipt_with_poi']  # 'email_address' - string
-
-
 
 ### Load the dictionary containing the dataset
 with open("final_project_dataset.pkl", "r") as data_file:
@@ -99,8 +98,6 @@ print "\n --- Select K-Bests ---"
 for i, s in enumerate((skb.scores_)):
     print " [", s, "] ", features_list[i+1]
 
-
-
 ###############################################################################
 ###########################              ######################################
 ###########################     Tune     ######################################
@@ -134,9 +131,9 @@ def tune_classifier( algoritm ):
 
 # algoritms for loop
 algoritms = {
-	#'Adaboost': {'skb': skb, 'pca': pca, 'clf': AdaBoostClassifier(DecisionTreeClassifier(criterion='entropy')),
-	#		'params': config['Adaboost']['params']
-	#		},
+	'Adaboost': {'skb': skb, 'pca': pca, 'clf': AdaBoostClassifier(DecisionTreeClassifier(criterion='entropy')),
+			'params': config['Adaboost']['params']
+			},
 	'RandomTree': {'skb': skb, 'pca': pca, 'clf': RandomForestClassifier(),
 			'params': config['RandomTree']['params']
 			},
@@ -155,6 +152,7 @@ algoritms = {
 }
 
 # select algoritm from classifier list
+temp_recall = 0
 temp_score = 0
 temp_accuracy = 0
 temp_algoritm = ""
@@ -168,26 +166,37 @@ for item in algoritms:
 	print "\n Fitting time: ", round(time()-t0, 3), "s"
 	
 	labels_pred = temp_result.predict(features_test)
+	pred = temp_result.predict(features)
+	
 	accuracy = accuracy_score(labels_test, labels_pred)
 	print " Score: ", temp_result.best_score_
 	print " Accuracy: ", accuracy
 	print " Best params: ", temp_result.best_params_
 	print " _____________"
-	clf = temp_result.best_estimator_
+
+	### launch main test for all the estimator cases
+	dump_classifier_and_data(temp_result.best_estimator_, my_dataset, features_list)
 	tester.main()
-	
-	if temp_result.best_score_ > temp_score:
+		
+	focus_recall = recall_score(labels, pred, average='macro')
+	print " Recall: ", focus_recall
+	if focus_recall > temp_recall:
+		temp_recall = focus_recall
 		temp_score = temp_result.best_score_
 		temp_accuracy = accuracy
 		temp_algoritm = item
 		clf = temp_result.best_estimator_
 	elif accuracy > temp_accuracy:
+		temp_recall = focus_recall
 		temp_score = temp_result.best_score_
 		temp_accuracy = accuracy 
 		temp_algoritm = item
 		clf = temp_result.best_estimator_
+	
 
-print "\n", "*"*70, "\n* Chosen ", temp_algoritm, ("score: ", temp_score, "accuracy", temp_accuracy),"\n", "*"*70
+print "\n", "*"*70, \
+	"\n* Chosen ", temp_algoritm, ("recall: ", temp_recall, "accuracy", temp_accuracy, "clf", clf),"\n", \
+	"*"*70
 
 ##############################################################################
 ### Task 6: Dump your classifier, dataset, and features_list so anyone can
@@ -197,5 +206,7 @@ print "\n", "*"*70, "\n* Chosen ", temp_algoritm, ("score: ", temp_score, "accur
 print "\n --- Test ---\n", "_"*70
 
 dump_classifier_and_data(clf, my_dataset, features_list)
-tester.main()
+
+if __name__ == '__main__':
+	tester.main()
 

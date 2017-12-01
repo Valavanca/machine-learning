@@ -3,12 +3,12 @@ config = {
 	'Adaboost': {
 		 #'pipeline': [('feature_selector', skb),('reduce_dim', pca), ('clf', clf)],
 		 'params': dict(feature_selector__k=[4,5,7,8,9,12],
-			      reduce_dim__n_components = [1,2,3,4],
-			      clf__n_estimators=[100,125,150,175,200,1000,5000],
+			      reduce_dim__n_components = [2,3,4],
+			      clf__n_estimators=[100,200,1000,4000,5000,7000],
 			      clf__algorithm=['SAMME', 'SAMME.R'])
 		},
 	'RandomTree': {
-		 'params': dict(feature_selector__k=[4,5,6,8,9,11,12],
+		 'params': dict(feature_selector__k=[4,5,6,7,8,11,12],
 			      reduce_dim__n_components = [2,3,4],
 			      clf__criterion = ['gini','entropy'],
 			      clf__min_samples_split = [2,4,6,10])
@@ -22,8 +22,8 @@ config = {
 		            )
 		},
 	'GaussianNB': {
-		 'params': dict(feature_selector__k=[6,7,8,9,11,12],
-			      reduce_dim__n_components = [2,3,4,5,6],
+		 'params': dict(feature_selector__k=[7,8,9,11,12],
+			      reduce_dim__n_components = [2,3,4,5,6,7],
 		            )
 		},
 	'MultinomialNB': {
