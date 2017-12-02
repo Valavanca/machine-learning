@@ -1,9 +1,16 @@
 #!/usr/bin/python
 
 import sys
+import os
 import pickle
 import numpy as np
-sys.path.append("../tools/")
+
+if __file__=="poi_id.py":
+	sys.path.append("../tools/")
+else:
+	sys.path.append(os.getcwd())
+	sys.path.append("./tools/")
+__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
 from feature_format import featureFormat, targetFeatureSplit
 from tester import dump_classifier_and_data
@@ -26,7 +33,7 @@ features_list += ['to_messages', 'from_poi_to_this_person', # email features
 		  'from_messages', 'from_this_person_to_poi', 'shared_receipt_with_poi']  # 'email_address' - string
 
 ### Load the dictionary containing the dataset
-with open("final_project_dataset.pkl", "r") as data_file:
+with open(os.path.join(__location__, "final_project_dataset.pkl"), "r") as data_file:
     data_dict = pickle.load(data_file)
 
 ### Task 2: Remove outliers
@@ -42,6 +49,7 @@ for element in data_dict:
 ### Task 3: Create new feature(s)
 ### Store to my_dataset for easy export below.
 my_dataset = data_dict
+
 
 for point in my_dataset:
     if 'NaN' in [my_dataset[point]['from_poi_to_this_person'],my_dataset[point]['to_messages']]:
@@ -175,8 +183,8 @@ for item in algoritms:
 	print " _____________"
 
 	### launch main test for all the estimator cases
-	dump_classifier_and_data(temp_result.best_estimator_, my_dataset, features_list)
-	tester.main()
+	#dump_classifier_and_data(temp_result.best_estimator_, my_dataset, features_list)
+	#tester.main()
 		
 	focus_recall = recall_score(labels, pred, average='macro')
 	print " Recall: ", focus_recall
@@ -195,7 +203,7 @@ for item in algoritms:
 	
 
 print "\n", "*"*70, \
-	"\n* Chosen ", temp_algoritm, ("recall: ", temp_recall, "accuracy", temp_accuracy, "clf", clf),"\n", \
+	"\n* Chosen ", temp_algoritm, ("recall: ", temp_recall, "accuracy", temp_accuracy),"\n", \
 	"*"*70
 
 ##############################################################################
