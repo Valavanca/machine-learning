@@ -123,19 +123,24 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.naive_bayes import MultinomialNB
 from sklearn import svm
 
+# upd 27.03
+from sklearn.metrics import classification_report
+import matplotlib.pyplot as plt
+
+# import seaborn as sns
+
 from classifier_param import config
 cv = StratifiedShuffleSplit(labels_train, n_iter=8, random_state = 33)
 
 # selection parameters for the algorithm (pipe->grid)
 def tune_classifier( algoritm ):
-	#t0 = time()
 	pipe = Pipeline([('min/max scaler', preprocessing.MinMaxScaler(feature_range=(0.0, 1.0))),
 			('feature_selector', algoritm['skb']),
-			('reduce_dim', algoritm['pca']), 
+			('reduce_dim', algoritm['pca']),
 			('clf', algoritm['clf'])])
-	skl_clf = GridSearchCV(pipe, param_grid=algoritm['params'], cv=cv, scoring='recall', verbose=1)
-	#print "\n Searching time: ", round(time()-t0, 3), "s"
-	return skl_clf;
+	#return GridSearchCV(pipe, param_grid=algoritm['params'], cv=cv, scoring='recall', verbose=10)			
+	return GridSearchCV(pipe, param_grid=algoritm['params'], scoring='accuracy', verbose=1)
+
 
 # algoritms for loop
 algoritms = {
@@ -158,6 +163,37 @@ algoritms = {
 	#		'params': config['SVC']['params']
 	#		},
 }
+def arr_scaler(arr):
+	temp_max = max(arr)
+	return map(lambda x: x/temp_max, arr)
+
+# PLOT function
+def plot_grid_search(cv_results, grid_param_1, grid_param_2, name_param_1, name_param_2, alg_name):
+	# Get Test Scores Mean, time and std for each grid search
+	scores_mean = cv_results['mean_test_score']
+	scores_mean = np.array(scores_mean).reshape(len(grid_param_2),len(grid_param_1))
+
+	scores_sd = cv_results['std_test_score']
+	scores_sd = np.array(scores_sd).reshape(len(grid_param_2),len(grid_param_1))
+
+	fit_time = cv_results['mean_fit_time']
+	fit_time = arr_scaler(fit_time)
+	fit_time = np.array(fit_time).reshape(len(grid_param_2),len(grid_param_1))
+
+	# Plot Grid search scores
+	_, ax = plt.subplots(1,1)
+	color = ["#1f77b4", "#2ca02c", "#d62728", "#d62728", "#9467bd"]
+
+	for idx, val in enumerate(grid_param_2):
+		print "param_2", idx, val
+		ax.plot(grid_param_1, scores_mean[idx,:], '-o', color=color[idx%len(color)], label= name_param_2 + ': ' + str(val))
+		ax.plot(grid_param_1, fit_time[idx,:], '-x', linestyle=':', color=color[idx%len(color)])
+
+	ax.set_title(alg_name, fontsize=20, fontweight='bold')
+	ax.set_xlabel(name_param_1, fontsize=16)
+	ax.set_ylabel('Accuracy / Time', fontsize=16)
+	ax.legend(loc="best", fontsize=15)
+	ax.grid('on')
 
 # select algoritm from classifier list
 temp_recall = 0
@@ -167,14 +203,38 @@ temp_algoritm = ""
 clf = MultinomialNB() #default
 
 for item in algoritms:
-	t0 = time()
+	# t0 = time()
+	# Algorithm name
 	print "_"*70, "\n|\n|      ", item, "\n|"
+
 	temp_result = tune_classifier(algoritms[item])
 	temp_result.fit(features_train,labels_train)
-	print "\n Fitting time: ", round(time()-t0, 3), "s"
-	
+
+	# -----------------------------------------
+	# PLOT
+	print "Grid scores on development set:\n"
+	means = temp_result.cv_results_['mean_test_score']
+	stds = temp_result.cv_results_['std_test_score']
+	fit_time = temp_result.cv_results_['mean_fit_time']
+	for mean, std, time, params in zip(means, stds, fit_time, temp_result.cv_results_['params']):
+		print("%0.3f (+/-%0.03f, %0.2f s*10^5) for %r"
+			% (mean, std * 2, time*100000, params))
+	print("\n")
+
+	plot_grid_search(temp_result.cv_results_, range(4,19), [2,3,4],'Features','reduce', item)
+	plt.show()
+
+
+	# REPORT
+	print("Detailed classification report:\n")
+	print("The model is trained on the full development set.")
+	print("The scores are computed on the full evaluation set.\n")
+
 	labels_pred = temp_result.predict(features_test)
 	pred = temp_result.predict(features)
+
+	print(classification_report(labels_test, labels_pred))
+	
 	
 	accuracy = accuracy_score(labels_test, labels_pred)
 	print " Score: ", temp_result.best_score_
@@ -217,4 +277,9 @@ dump_classifier_and_data(clf, my_dataset, features_list)
 
 if __name__ == '__main__':
 	tester.main()
+
+
+
+
+
 
