@@ -24,7 +24,7 @@ print "..emails have got]"
 
 
 #########################################################
-from tpot import TPOTClassifier
+
 from sklearn import tree
 from sklearn.metrics import accuracy_score
 
@@ -42,13 +42,8 @@ pred = clf.predict(features_test)
 acc = accuracy_score(pred, labels_test)
 print "predicting time: ", round(time()-t1, 3), "s"
 
-print "Accuracy :: "
+print "___ accuracy"
 print(round(acc,3))
-
-print "______________\n TPOT :: \n______________"
-tpot = TPOTClassifier(generations=5, population_size=20, verbosity=2)
-tpot.fit(features_train, labels_train)
-print(tpot.score(features_test, labels_test))
 
 
 #########################################################

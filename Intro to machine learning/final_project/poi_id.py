@@ -139,7 +139,7 @@ def tune_classifier( algoritm ):
 			('reduce_dim', algoritm['pca']),
 			('clf', algoritm['clf'])])
 	#return GridSearchCV(pipe, param_grid=algoritm['params'], cv=cv, scoring='recall', verbose=10)			
-	return GridSearchCV(pipe, param_grid=algoritm['params'], scoring='accuracy', cv=10, verbose=1)
+	return GridSearchCV(pipe, param_grid=algoritm['params'], scoring='accuracy', verbose=1)
 
 
 # algoritms for loop
@@ -190,9 +190,9 @@ def plot_grid_search(cv_results, grid_param_1, grid_param_2, name_param_1, name_
 		ax.plot(grid_param_1, fit_time[idx,:], '-x', linestyle=':', color=color[idx%len(color)])
 
 	ax.set_title(alg_name, fontsize=20, fontweight='bold')
-	ax.set_xlabel(name_param_1, fontsize=15)
-	ax.set_ylabel('Accuracy / Time', fontsize=15)
-	ax.legend(loc="best", fontsize=11)
+	ax.set_xlabel(name_param_1, fontsize=16)
+	ax.set_ylabel('Accuracy / Time', fontsize=16)
+	ax.legend(loc="best", fontsize=15)
 	ax.grid('on')
 
 # select algoritm from classifier list
@@ -217,7 +217,7 @@ for item in algoritms:
 	stds = temp_result.cv_results_['std_test_score']
 	fit_time = temp_result.cv_results_['mean_fit_time']
 	for mean, std, time, params in zip(means, stds, fit_time, temp_result.cv_results_['params']):
-		print("%0.3f (+/-%0.03f, %0.2f*10^-5 sec) for %r"
+		print("%0.3f (+/-%0.03f, %0.2f s*10^5) for %r"
 			% (mean, std * 2, time*100000, params))
 	print("\n")
 
