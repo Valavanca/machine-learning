@@ -8,3 +8,5 @@ maildir/
 text_learning/your_word_data.pkl
 text_learning/your_email_authors.pkl
 
+Computer Vision 1/opencv/*
+Computer/*
