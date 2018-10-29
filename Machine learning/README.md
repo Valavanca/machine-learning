@@ -1,0 +1,1 @@
+#### :squirrel: Coursera Machine lerning [corse](https://www.coursera.org/learn/machine-learning/)
